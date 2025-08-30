@@ -11,21 +11,89 @@ MENU_LOCATION = "tools/scripts/zssork"
 BRUSH_SIZE_MODIFIER = 0.2
 BRUSH_OPACITY_MODIFIER = 0.25
 
-class ZssorkToolsDialog(QDialog):
-    
+class ZssorkSettings:
     def __init__(self):
+        self.settings = QSettings("Zssork", "ZssorkTools")
+        self.primary_brush = self.settings.value("primary_brush", "")
+        self.secondary_brush = self.settings.value("secondary_brush", "")
+        self.keep_opacity_tool_switch = self.settings.value("keep_opacity_tool_switch", True, type=bool)
+        self.deactivate_pressure_on_start = self.settings.value("deactivate_pressure_on_start", True, type=bool)
+
+    def set_primary_brush(self, name):
+        self.primary_brush = name
+        self.settings.setValue("primary_brush", self.primary_brush)
+
+    def set_secondary_brush(self, name):
+        self.secondary_brush = name
+        self.settings.setValue("secondary_brush", self.secondary_brush)
+
+    def toggle_keep_opacity_tool_switch(self):
+        self.keep_opacity_tool_switch = not self.keep_opacity_tool_switch
+        self.settings.setValue("keep_opacity_tool_switch", self.keep_opacity_tool_switch)
+
+    def toggle_deactivate_pressure_on_start(self):
+        self.deactivate_pressure_on_start = not self.deactivate_pressure_on_start
+        self.settings.setValue("deactivate_pressure_on_start", self.deactivate_pressure_on_start)
+
+class ZssorkToolsSettingsDialog(QDialog):
+
+    def __init__(self, settings:ZssorkSettings):
         super().__init__()
         self.setWindowTitle("ZssorkTools")
-        label = QLabel(self)
-        label.setObjectName("label")
+        self.setMinimumSize(700, 200)
+
+        # Persistent settings
+        self.settings = settings
+
+        # UI
+        label = QLabel("Zssork Tools Settings", self)
         label.setAlignment(Qt.AlignCenter)
-        label.setText("Hello World")
-        
+
+        self.btn_set_primary = QPushButton("Set Primary (from selected)")
+        self.btn_set_secondary = QPushButton("Set Secondary (from selected)")
+
+        self.btn_set_primary.clicked.connect(self.set_primary_brush)
+        self.btn_set_secondary.clicked.connect(self.set_secondary_brush)
+
+        # Brush chooser widget
+        self.chooser = PresetChooser(self)
+
+        self.keep_opacity_switch = QCheckBox("Keep same opacity on tool switch", self)
+        self.keep_opacity_switch.setChecked(self.settings.keep_opacity_tool_switch)
+        self.keep_opacity_switch.stateChanged.connect(self.settings.toggle_keep_opacity_tool_switch)
+
+        self.deactivate_pressure_on_start = QCheckBox("Deactivate pen pressure on startup", self)
+        self.deactivate_pressure_on_start.setChecked(self.settings.deactivate_pressure_on_start)
+        self.deactivate_pressure_on_start.stateChanged.connect(self.settings.toggle_deactivate_pressure_on_start)
+
+        # Restore saved
+        self.update_labels()
+
+        # Layout
         layout = QVBoxLayout()
         layout.addWidget(label)
-        
+        layout.addWidget(self.btn_set_primary)
+        layout.addWidget(self.btn_set_secondary)
+        layout.addWidget(self.chooser)
+        layout.addWidget(self.keep_opacity_switch)
+        layout.addWidget(self.deactivate_pressure_on_start)
         self.setLayout(layout)
 
+    def update_labels(self):
+        self.btn_set_primary.setText(f"Update Primary (current: {self.settings.primary_brush if self.settings.primary_brush else 'None'})")
+        self.btn_set_secondary.setText(f"Update Secondary (current: {self.settings.secondary_brush if self.settings.secondary_brush else 'None'})")
+
+    def set_primary_brush(self):
+        preset = self.chooser.currentPreset()
+        if preset:
+            self.settings.set_primary_brush(preset.name())
+            self.update_labels()
+
+    def set_secondary_brush(self):
+        preset = self.chooser.currentPreset()
+        if preset:
+            self.settings.set_secondary_brush(preset.name())
+            self.update_labels()
 
 def monkey_patch(view):
     # monkey patching View class
@@ -39,55 +107,96 @@ class ZssorkTools(Extension):
     def __init__(self, parent):
         # This is initialising the parent, always important when subclassing.
         super().__init__(parent)
-        self.dialog = ZssorkToolsDialog()
+        self.menu = None
+        self.settings = ZssorkSettings()
+        self.dialog = ZssorkToolsSettingsDialog(self.settings)
 
     def setup(self):
         #This runs only once when app is installed
         pass
 
     def createActions(self, window):
+        action = window.createAction('Zssork', 'Zssork', 'tools/scripts/zssork')
+        self.menu = QMenu('Zssork', window.qwindow())
+        action.setMenu(self.menu)
         action = window.createAction("ZssorkToolsOpenDialog", "Open ZssorkTools Dialog", MENU_LOCATION)
         action.triggered.connect(self.dialog.show)
 
-        toggle_brush_action = window.createAction(
-            "zssork_toggle_brush", "Toggle Brush", MENU_LOCATION
+        action = window.createAction(
+            "zssork_toggle_brush", "Toggle Primary/Secondary Brush", MENU_LOCATION
         )
-        toggle_brush_action.triggered.connect(partial(self.toggle_brush))
+        action.triggered.connect(partial(self.toggle_brush))
+        self.menu.addAction(action)
 
-        toggle_opacity_action = window.createAction(
+        action = window.createAction(
             "zssork_toggle_opacity", "Toggle Opacity", MENU_LOCATION
         )
-        toggle_opacity_action.triggered.connect(partial(self.toggle_opacity))
+        action.triggered.connect(partial(self.toggle_opacity))
+        self.menu.addAction(action)
 
-        toggle_pressure_action = window.createAction(
+        action = window.createAction(
             "zssork_toggle_pressure", "Smart Toggle Pressure", MENU_LOCATION
         )
-        toggle_pressure_action.triggered.connect(partial(self.toggle_pressure))
+        action.triggered.connect(partial(self.toggle_pressure))
+        self.menu.addAction(action)
 
-        increase_brush_size_action = window.createAction(
+        action = window.createAction(
             "zssork_increase_size", "Increase Brush Size", MENU_LOCATION
         )
-        increase_brush_size_action.triggered.connect(partial(self.increase_brush_size))
+        action.triggered.connect(partial(self.increase_brush_size))
+        self.menu.addAction(action)
 
-        decrease_brush_size_action = window.createAction(
+        action = window.createAction(
             "zssork_decrease_size", "Decrease Brush Size", MENU_LOCATION
         )
-        decrease_brush_size_action.triggered.connect(partial(self.decrease_brush_size))
+        action.triggered.connect(partial(self.decrease_brush_size))
+        self.menu.addAction(action)
 
-        increase_opacity_action = window.createAction(
+        action = window.createAction(
             "zssork_increase_opacity", "Increase Opacity", MENU_LOCATION
         )
-        increase_opacity_action.triggered.connect(partial(self.increase_opacity))
+        action.triggered.connect(partial(self.increase_opacity))
+        self.menu.addAction(action)
 
-        decrease_opacity_action = window.createAction(
+        action = window.createAction(
             "zssork_decrease_opacity", "Decrease Opacity", MENU_LOCATION
         )
-        decrease_opacity_action.triggered.connect(partial(self.decrease_opacity))
+        action.triggered.connect(partial(self.decrease_opacity))
+        self.menu.addAction(action)
 
+        QTimer.singleShot(500, self.delayed_init)
+
+    def delayed_init(self): # hmpf
+        if self.settings.deactivate_pressure_on_start:
+            self.disable_pressure()
 
     def toggle_brush(self):
-        # TODO implement lol
-        print("")
+        if self.is_preset_resource_active(self.settings.primary_brush):
+            self.activate_preset_resource(self.settings.secondary_brush)
+        else:
+            self.activate_preset_resource(self.settings.primary_brush)
+
+    def is_preset_resource_active(self, name):
+        krita = Krita.instance()
+        window = krita.activeWindow()
+        view = window.activeView()
+        return name == view.currentBrushPreset().name()
+
+    def activate_preset_resource(self, name):
+        if not name:
+            return
+        presets = Krita.instance().resources("preset")
+        resource = presets.get(name, None)
+        if resource:
+            krita = Krita.instance()
+            window = krita.activeWindow()
+            view = window.activeView()
+            if self.settings.keep_opacity_tool_switch:
+                opacity = view.paintingOpacity()
+                view.setCurrentBrushPreset(resource)
+                view.setPaintingOpacity(opacity)
+            else:
+                view.setCurrentBrushPreset(resource)
 
     def toggle_opacity(self):
         krita = Krita.instance()
@@ -106,6 +215,11 @@ class ZssorkTools(Extension):
             krita._toggle_opacity_alt_state = opacity
             view.setPaintingOpacity(1)
         monkey_patch(view)
+
+    def disable_pressure(self):
+        action = Krita.instance().action("disable_pressure")
+        if action and action.isChecked():
+            action.setChecked(False)
 
     def toggle_pressure(self):
         krita = Krita.instance()
@@ -180,4 +294,4 @@ class ZssorkTools(Extension):
 
 
 # And add the extension to Krita's list of extensions:
-Krita.instance().addExtension(ZssorkTools(Krita.instance())) 
+Krita.instance().addExtension(ZssorkTools(Krita.instance()))
