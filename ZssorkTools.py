@@ -2,6 +2,7 @@
 # load autocomplete
 from typing import TYPE_CHECKING
 from functools import partial
+from PyQt5.QtWidgets import QApplication
 if TYPE_CHECKING:
     from .PyKrita import *
 else:
@@ -110,6 +111,67 @@ class ZssorkTools(Extension):
         self.menu = None
         self.settings = ZssorkSettings()
         self.dialog = ZssorkToolsSettingsDialog(self.settings)
+        self.previous_tool = None
+        self.is_left_mouse_button_down = False
+        self.is_shift_key_down = False
+        QApplication.instance().installEventFilter(self)
+
+    def is_left_button_down(self):
+        buttons = QApplication.mouseButtons()
+        return bool(buttons & Qt.LeftButton)
+
+    def is_shift_down():
+        mods = QApplication.keyboardModifiers()
+        return bool(mods & Qt.ShiftModifier)
+
+    def eventFilter(self, obj, event):
+        try:
+            if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Shift and not event.isAutoRepeat():
+                self.is_shift_key_down = True
+                self.temporary_switch_to_line_tool()
+                return False  # don't consume; let other handlers see it too
+
+            if event.type() == QEvent.KeyRelease and event.key() == Qt.Key_Shift and not event.isAutoRepeat():
+                self.is_shift_key_down = False
+                if not self.is_left_mouse_button_down:
+                    self.switch_temporary_tool_back()
+                return False
+
+            if (event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton) or event.type() == QEvent.TabletPress:
+                self.is_left_mouse_button_down = True
+                return False
+
+            if (event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton) or event.type() == QEvent.TabletRelease:
+                self.is_left_mouse_button_down = False
+                if not self.is_shift_key_down:
+                    self.switch_temporary_tool_back()
+                return False
+
+        except Exception as e:
+            print("ShiftLineTool error:", e)
+        return False
+
+    def is_tool_active(self, tool_name):
+        toolbox = Krita.instance().activeWindow().qwindow().findChild(QDockWidget, 'ToolBox')
+        brush_button = toolbox.findChild(QToolButton, tool_name)
+        return brush_button.isChecked() if brush_button else False
+
+    def temporary_switch_to_line_tool(self):
+        if self.is_tool_active('KritaShape/KisToolBrush'):
+            krita = Krita.instance()
+            window = krita.activeWindow()
+            view = window.activeView()
+            opacity = view.paintingOpacity()
+            self.previous_tool = "KritaShape/KisToolBrush"
+            Krita.instance().action('KritaShape/KisToolLine').trigger()
+            if self.settings.keep_opacity_tool_switch:
+                view.setPaintingOpacity(opacity)
+
+
+    def switch_temporary_tool_back(self):
+        if self.previous_tool:
+            Krita.instance().action(self.previous_tool).trigger()
+            self.previous_tool = None
 
     def setup(self):
         #This runs only once when app is installed
@@ -169,6 +231,7 @@ class ZssorkTools(Extension):
     def delayed_init(self): # hmpf
         if self.settings.deactivate_pressure_on_start:
             self.disable_pressure()
+        QApplication.instance().installEventFilter(self)
 
     def toggle_brush(self):
         if self.is_preset_resource_active(self.settings.primary_brush):
