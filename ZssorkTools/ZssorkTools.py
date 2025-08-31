@@ -15,6 +15,7 @@ class ZssorkSettings:
         self.primary_brush = self.settings.value("primary_brush", "")
         self.secondary_brush = self.settings.value("secondary_brush", "")
         self.keep_opacity_tool_switch = self.settings.value("keep_opacity_tool_switch", True, type=bool)
+        self.keep_size_tool_switch = self.settings.value("keep_size_tool_switch", True, type=bool)
         self.deactivate_pressure_on_start = self.settings.value("deactivate_pressure_on_start", True, type=bool)
         self.brush_size_modifier = self.settings.value("brush_size_modifier", 0.2, type=float)
         self.brush_opacity_modifier = self.settings.value("brush_opacity_modifier", 0.25, type=float)
@@ -30,6 +31,10 @@ class ZssorkSettings:
     def toggle_keep_opacity_tool_switch(self):
         self.keep_opacity_tool_switch = not self.keep_opacity_tool_switch
         self.settings.setValue("keep_opacity_tool_switch", self.keep_opacity_tool_switch)
+
+    def toggle_keep_size_tool_switch(self):
+        self.keep_size_tool_switch = not self.keep_size_tool_switch
+        self.settings.setValue("keep_size_tool_switch", self.keep_size_tool_switch)
 
     def toggle_deactivate_pressure_on_start(self):
         self.deactivate_pressure_on_start = not self.deactivate_pressure_on_start
@@ -67,6 +72,10 @@ class ZssorkToolsSettingsDialog(QDialog):
         self.keep_opacity_switch.setChecked(self.settings.keep_opacity_tool_switch)
         self.keep_opacity_switch.stateChanged.connect(self.settings.toggle_keep_opacity_tool_switch)
 
+        self.keep_size_switch = QCheckBox("Keep same size on line tool switch", self)
+        self.keep_size_switch.setChecked(self.settings.keep_size_tool_switch)
+        self.keep_size_switch.stateChanged.connect(self.settings.toggle_keep_size_tool_switch)
+
         self.deactivate_pressure_on_start = QCheckBox("Deactivate pen pressure on startup", self)
         self.deactivate_pressure_on_start.setChecked(self.settings.deactivate_pressure_on_start)
         self.deactivate_pressure_on_start.stateChanged.connect(self.settings.toggle_deactivate_pressure_on_start)
@@ -95,6 +104,7 @@ class ZssorkToolsSettingsDialog(QDialog):
         layout.addWidget(self.btn_set_secondary)
         layout.addWidget(self.chooser)
         layout.addWidget(self.keep_opacity_switch)
+        layout.addWidget(self.keep_size_switch)
         layout.addWidget(self.deactivate_pressure_on_start)
 
         form_layout = QFormLayout()
@@ -271,12 +281,13 @@ class ZssorkTools(Extension):
             krita = Krita.instance()
             window = krita.activeWindow()
             view = window.activeView()
+            opacity = view.paintingOpacity()
+            size = view.brushSize()
+            view.setCurrentBrushPreset(resource)
+            if self.settings.keep_size_tool_switch:
+                view.setBrushSize(size)
             if self.settings.keep_opacity_tool_switch:
-                opacity = view.paintingOpacity()
-                view.setCurrentBrushPreset(resource)
                 view.setPaintingOpacity(opacity)
-            else:
-                view.setCurrentBrushPreset(resource)
 
     def toggle_opacity(self):
         krita = Krita.instance()
