@@ -116,20 +116,12 @@ class ZssorkTools(Extension):
         self.is_shift_key_down = False
         QApplication.instance().installEventFilter(self)
 
-    def is_left_button_down(self):
-        buttons = QApplication.mouseButtons()
-        return bool(buttons & Qt.LeftButton)
-
-    def is_shift_down():
-        mods = QApplication.keyboardModifiers()
-        return bool(mods & Qt.ShiftModifier)
-
     def eventFilter(self, obj, event):
         try:
             if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Shift and not event.isAutoRepeat():
                 self.is_shift_key_down = True
                 self.temporary_switch_to_line_tool()
-                return False  # don't consume; let other handlers see it too
+                return False
 
             if event.type() == QEvent.KeyRelease and event.key() == Qt.Key_Shift and not event.isAutoRepeat():
                 self.is_shift_key_down = False
