@@ -8,8 +8,6 @@ else:
     from krita import *
             
 MENU_LOCATION = "tools/scripts/zssork"
-BRUSH_SIZE_MODIFIER = 0.2
-BRUSH_OPACITY_MODIFIER = 0.25
 
 class ZssorkSettings:
     def __init__(self):
@@ -18,6 +16,8 @@ class ZssorkSettings:
         self.secondary_brush = self.settings.value("secondary_brush", "")
         self.keep_opacity_tool_switch = self.settings.value("keep_opacity_tool_switch", True, type=bool)
         self.deactivate_pressure_on_start = self.settings.value("deactivate_pressure_on_start", True, type=bool)
+        self.brush_size_modifier = self.settings.value("brush_size_modifier", 0.2, type=float)
+        self.brush_opacity_modifier = self.settings.value("brush_opacity_modifier", 0.25, type=float)
 
     def set_primary_brush(self, name):
         self.primary_brush = name
@@ -35,6 +35,14 @@ class ZssorkSettings:
         self.deactivate_pressure_on_start = not self.deactivate_pressure_on_start
         self.settings.setValue("deactivate_pressure_on_start", self.deactivate_pressure_on_start)
 
+    def set_brush_size_modifier(self, value):
+        self.brush_size_modifier = max(0.1, min(1.0, value))
+        self.settings.setValue("brush_size_modifier", self.brush_size_modifier)
+
+    def set_brush_opacity_modifier(self, value):
+        self.brush_opacity_modifier = max(0.1, min(1.0, value))
+        self.settings.setValue("brush_opacity_modifier", self.brush_opacity_modifier)
+
 class ZssorkToolsSettingsDialog(QDialog):
 
     def __init__(self, settings:ZssorkSettings):
@@ -42,10 +50,8 @@ class ZssorkToolsSettingsDialog(QDialog):
         self.setWindowTitle("ZssorkTools")
         self.setMinimumSize(700, 200)
 
-        # Persistent settings
         self.settings = settings
 
-        # UI
         label = QLabel("Zssork Tools Settings", self)
         label.setAlignment(Qt.AlignCenter)
 
@@ -55,16 +61,29 @@ class ZssorkToolsSettingsDialog(QDialog):
         self.btn_set_primary.clicked.connect(self.set_primary_brush)
         self.btn_set_secondary.clicked.connect(self.set_secondary_brush)
 
-        # Brush chooser widget
         self.chooser = PresetChooser(self)
 
-        self.keep_opacity_switch = QCheckBox("Keep same opacity on tool switch", self)
+        self.keep_opacity_switch = QCheckBox("Keep same opacity on line tool switch", self)
         self.keep_opacity_switch.setChecked(self.settings.keep_opacity_tool_switch)
         self.keep_opacity_switch.stateChanged.connect(self.settings.toggle_keep_opacity_tool_switch)
 
         self.deactivate_pressure_on_start = QCheckBox("Deactivate pen pressure on startup", self)
         self.deactivate_pressure_on_start.setChecked(self.settings.deactivate_pressure_on_start)
         self.deactivate_pressure_on_start.stateChanged.connect(self.settings.toggle_deactivate_pressure_on_start)
+
+        self.brush_size_modifier_input = QDoubleSpinBox(self)
+        self.brush_size_modifier_input.setRange(0.0, 1.0)
+        self.brush_size_modifier_input.setSingleStep(0.05)
+        self.brush_size_modifier_input.setDecimals(2)
+        self.brush_size_modifier_input.setValue(self.settings.brush_size_modifier)
+        self.brush_size_modifier_input.valueChanged.connect(self.settings.set_brush_size_modifier)
+
+        self.brush_opacity_modifier_input = QDoubleSpinBox(self)
+        self.brush_opacity_modifier_input.setRange(0.0, 1.0)
+        self.brush_opacity_modifier_input.setSingleStep(0.05)
+        self.brush_opacity_modifier_input.setDecimals(2)
+        self.brush_opacity_modifier_input.setValue(self.settings.brush_opacity_modifier)
+        self.brush_opacity_modifier_input.valueChanged.connect(self.settings.set_brush_opacity_modifier)
 
         # Restore saved
         self.update_labels()
@@ -77,6 +96,12 @@ class ZssorkToolsSettingsDialog(QDialog):
         layout.addWidget(self.chooser)
         layout.addWidget(self.keep_opacity_switch)
         layout.addWidget(self.deactivate_pressure_on_start)
+
+        form_layout = QFormLayout()
+        form_layout.addRow("Brush Size Modifier:", self.brush_size_modifier_input)
+        form_layout.addRow("Brush Opacity Modifier:", self.brush_opacity_modifier_input)
+        layout.addLayout(form_layout)
+
         self.setLayout(layout)
 
     def update_labels(self):
@@ -110,6 +135,60 @@ class ZssorkTools(Extension):
         self.menu = None
         self.settings = ZssorkSettings()
         self.dialog = ZssorkToolsSettingsDialog(self.settings)
+        self.previous_tool = None
+        self.is_left_mouse_button_down = False
+        self.is_shift_key_down = False
+        QApplication.instance().installEventFilter(self)
+
+
+    def eventFilter(self, obj, event):
+        try:
+            if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Shift and not event.isAutoRepeat():
+                self.is_shift_key_down = True
+                self.temporary_switch_to_line_tool()
+                return False
+
+            if event.type() == QEvent.KeyRelease and event.key() == Qt.Key_Shift and not event.isAutoRepeat():
+                self.is_shift_key_down = False
+                if not self.is_left_mouse_button_down:
+                    self.switch_temporary_tool_back()
+                return False
+
+            if (event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton) or event.type() == QEvent.TabletPress:
+                self.is_left_mouse_button_down = True
+                return False
+
+            if (event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton) or event.type() == QEvent.TabletRelease:
+                self.is_left_mouse_button_down = False
+                if not self.is_shift_key_down:
+                    self.switch_temporary_tool_back()
+                return False
+
+        except Exception as e:
+            print("ShiftLineTool error:", e)
+        return False
+
+    def is_tool_active(self, tool_name):
+        toolbox = Krita.instance().activeWindow().qwindow().findChild(QDockWidget, 'ToolBox')
+        brush_button = toolbox.findChild(QToolButton, tool_name)
+        return brush_button.isChecked() if brush_button else False
+
+    def temporary_switch_to_line_tool(self):
+        if self.is_tool_active('KritaShape/KisToolBrush'):
+            krita = Krita.instance()
+            window = krita.activeWindow()
+            view = window.activeView()
+            opacity = view.paintingOpacity()
+            self.previous_tool = "KritaShape/KisToolBrush"
+            Krita.instance().action('KritaShape/KisToolLine').trigger()
+            if self.settings.keep_opacity_tool_switch:
+                view.setPaintingOpacity(opacity)
+
+
+    def switch_temporary_tool_back(self):
+        if self.previous_tool:
+            Krita.instance().action(self.previous_tool).trigger()
+            self.previous_tool = None
 
     def setup(self):
         #This runs only once when app is installed
@@ -169,6 +248,7 @@ class ZssorkTools(Extension):
     def delayed_init(self): # hmpf
         if self.settings.deactivate_pressure_on_start:
             self.disable_pressure()
+        QApplication.instance().installEventFilter(self)
 
     def toggle_brush(self):
         if self.is_preset_resource_active(self.settings.primary_brush):
@@ -254,7 +334,7 @@ class ZssorkTools(Extension):
         view = window.activeView()
 
         size = view.brushSize()
-        size = round(size * (1.0 + BRUSH_SIZE_MODIFIER))
+        size = round(size * (1.0 + self.settings.brush_size_modifier))
 
         view.setBrushSize(size)
         monkey_patch(view)
@@ -265,7 +345,7 @@ class ZssorkTools(Extension):
         view = window.activeView()
 
         size = view.brushSize()
-        size = round(size * (1.0 - BRUSH_SIZE_MODIFIER))
+        size = round(size * (1.0 - self.settings.brush_size_modifier))
 
         view.setBrushSize(size)
         monkey_patch(view)
@@ -276,7 +356,7 @@ class ZssorkTools(Extension):
         view = window.activeView()
 
         opacity = view.paintingOpacity()
-        opacity = min(1, opacity + BRUSH_OPACITY_MODIFIER)
+        opacity = min(1, opacity + self.settings.brush_opacity_modifier)
 
         view.setPaintingOpacity(opacity)
         monkey_patch(view)
@@ -287,7 +367,7 @@ class ZssorkTools(Extension):
         view = window.activeView()
 
         opacity = view.paintingOpacity()
-        opacity = max(BRUSH_OPACITY_MODIFIER, opacity - BRUSH_OPACITY_MODIFIER)
+        opacity = max(self.settings.brush_opacity_modifier, opacity - self.settings.brush_opacity_modifier)
 
         view.setPaintingOpacity(opacity)
         monkey_patch(view)

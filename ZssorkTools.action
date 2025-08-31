@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ActionCollection version="2" name="Scripts">
+    <Actions category="Scripts">
+        <text>Zssork Scripts</text>
+        <Action name="zssork_toggle_brush">
+            <activationConditions>0</activationConditions>
+            <activationFlags>10000</activationFlags>
+            <iconText></iconText>
+            <isCheckable>false</isCheckable>
+            <shortcut>F</shortcut>
+            <statusTip></statusTip>
+            <text>Toggle Brush</text>
+            <toolTip></toolTip>
+            <whatsThis></whatsThis>
+            <category>Scripts</category>
+            <categoryText>Zssork Scripts</categoryText>
+        </Action>
+        <Action name="zssork_toggle_opacity">
+            <activationConditions>0</activationConditions>
+            <activationFlags>10000</activationFlags>
+            <iconText></iconText>
+            <isCheckable>false</isCheckable>
+            <shortcut>D</shortcut>
+            <statusTip></statusTip>
+            <text>Toggle Opacity</text>
+            <toolTip></toolTip>
+            <whatsThis></whatsThis>
+            <category>Scripts</category>
+            <categoryText>Zssork Scripts</categoryText>
+        </Action>
+        <Action name="zssork_toggle_pressure">
+            <activationConditions>0</activationConditions>
+            <activationFlags>10000</activationFlags>
+            <iconText></iconText>
+            <isCheckable>false</isCheckable>
+            <shortcut>Y</shortcut>
+            <statusTip></statusTip>
+            <text>Toggle Pressure</text>
+            <toolTip></toolTip>
+            <whatsThis></whatsThis>
+            <category>Scripts</category>
+            <categoryText>Zssork Scripts</categoryText>
+        </Action>
+        <Action name="zssork_increase_size">
+            <activationConditions>0</activationConditions>
+            <activationFlags>10000</activationFlags>
+            <iconText></iconText>
+            <isCheckable>false</isCheckable>
+            <shortcut>V</shortcut>
+            <statusTip></statusTip>
+            <text>Increase Size</text>
+            <toolTip></toolTip>
+            <whatsThis></whatsThis>
+            <category>Scripts</category>
+            <categoryText>Zssork Scripts</categoryText>
+        </Action>
+        <Action name="zssork_decrease_size">
+            <activationConditions>0</activationConditions>
+            <activationFlags>10000</activationFlags>
+            <iconText></iconText>
+            <isCheckable>false</isCheckable>
+            <shortcut>C</shortcut>
+            <statusTip></statusTip>
+            <text>Decrease Size</text>
+            <toolTip></toolTip>
+            <whatsThis></whatsThis>
+            <category>Scripts</category>
+            <categoryText>Zssork Scripts</categoryText>
+        </Action>
+        <Action name="zssork_increase_opacity">
+            <activationConditions>0</activationConditions>
+            <activationFlags>10000</activationFlags>
+            <iconText></iconText>
+            <isCheckable>false</isCheckable>
+            <shortcut>S</shortcut>
+            <statusTip></statusTip>
+            <text>Increase Opacity</text>
+            <toolTip></toolTip>
+            <whatsThis></whatsThis>
+            <category>Scripts</category>
+            <categoryText>Zssork Scripts</categoryText>
+        </Action>
+        <Action name="zssork_decrease_opacity">
+            <activationConditions>0</activationConditions>
+            <activationFlags>10000</activationFlags>
+            <iconText></iconText>
+            <isCheckable>false</isCheckable>
+            <shortcut><![CDATA[A]]></shortcut>
+            <statusTip></statusTip>
+            <text>Decrease Opacity</text>
+            <toolTip></toolTip>
+            <whatsThis></whatsThis>
+            <category>Scripts</category>
+            <categoryText>Zssork Scripts</categoryText>
+        </Action>
+    </Actions>
+</ActionCollection>
