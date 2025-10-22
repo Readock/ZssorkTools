@@ -108,7 +108,7 @@ class ZssorkToolsSettingsDialog(QDialog):
         layout.addWidget(self.deactivate_pressure_on_start)
 
         form_layout = QFormLayout()
-        form_layout.addRow("Brush Size Modifier:", self.brush_size_modifier_input)
+        form_layout.addRow("Brush Size Modifier (in %):", self.brush_size_modifier_input)
         form_layout.addRow("Brush Opacity Modifier:", self.brush_opacity_modifier_input)
         layout.addLayout(form_layout)
 
