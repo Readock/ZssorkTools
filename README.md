@@ -36,6 +36,6 @@ If you're having issues, more information on plugin installation can be found [h
 If you also want to have my layout and shortcuts. Go to your krita konfig path and copy the files from the `ZssorkConfig` folder:
 
 - *.kws => krita/workspaces
-- *.input => krita/input
+- *.profile => krita/input
 - *.shortcuts => krita/shortcuts
 - *.colors => krita/color-schemes
