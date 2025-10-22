@@ -7,32 +7,33 @@
 
 Collection of scripts that I use for my painting workflow in Krita.
 
-- Line tool (SHIFT)
+> [!WARNING]
+> 
+> The shortcuts might be conflicting with your current shortcuts so make sure to resolve any conflicts! The plugin shortcuts can also be changed in `Settings > Keyboard Shortcuts`
+> 
+
+- Line tool (`SHIFT`)
   - Quickly change to line tool with one button press (similar to photoshop)
   - Option to keep current opacity settings as well for convenience
-- Toggle Primary/Secondary Brush (F)
+- Toggle Primary/Secondary Brush (`F`)
   - Allows switching between two configured brushes quickly
   - _Note: I use it to change between **Hard Round** and **Airbrush** (because ten brush script feels a bit clumsy sometimes and this is only one simple button press. You can also configure the plugin to toggle between the last selected and the secondary brush)_
 - Increase/Decrease Brush Size
-  - Modifies the brush size (C/V)
+  - Modifies the brush size (`C`/`V`)
   - _Note: the default Krita actions are constant and not proportional to current brush size_
 - Increase/Decrease Opacity
-  - Modifies the opacity (A/S)
+  - Modifies the opacity (`A`/`S`)
   - _Note: configurable modifier_
-- Smart Toggle Pressure (Y)
+- Smart Toggle Pressure (`Y`)
   - On: Sets opacity to 100% and activates pressure
   - Off: Deactivate pressure and switch to previous opacity 
   - _Note: with pressure sensitivity I always want 100% opacity as well_
-- Toggle Opacity (D)
+- Toggle Opacity (`D`)
   - On: Sets opacity to 100%
   - Off: Switch to previous opacity
 
 > I also use the [Separate Brush and Eraser](https://github.com/ollyisonit/krita-separate-brush-eraser) plugin with Brush (B) and Eraser (E)
 
-> [!WARNING]
-> 
-> The shortcuts might be conflicting with your current shortcuts so make sure to resolve any conflicts! The plugin shortcuts can also be changed in `Settings > Keyboard Shortcuts`
-> 
 ## Plugin Installation
 
 Download the [ZssorkTools.zip](https://github.com/Readock/ZssorkTools/archive/refs/heads/main.zip) file and install it by going to `Tools > Scripts > Import Python Plugin From File...` in Krita. 
