@@ -1,11 +1,9 @@
 
+# Zssork Krita Tools
+
 <p align="center">
   <img src="./thumbnail.jpg" width="25%"> 
 </p>
-
---- 
-
-# Zssork Krita Tools
 
 Collection of scripts that I use for my painting workflow in Krita.
 
