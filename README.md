@@ -7,7 +7,7 @@ Collection of scripts that I use for my painting workflow in Krita.
   - Option to keep current opacity settings as well for convenience
 - Toggle Primary/Secondary Brush (F)
   - Allows switching between two configured brushes quickly
-  - _Note: I use it to change between **Hard Round** and **Airbrush** (because ten brush script feels a bit clumsy sometimes and this is only one simple button press)_
+  - _Note: I use it to change between **Hard Round** and **Airbrush** (because ten brush script feels a bit clumsy sometimes and this is only one simple button press. You can also configure the plugin to toggle between the last selected and the secondary brush)_
 - Increase/Decrease Brush Size
   - Modifies the brush size (C/V)
   - _Note: the default Krita actions are constant and not proportional to current brush size_

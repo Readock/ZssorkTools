@@ -15,6 +15,7 @@ class ZssorkSettings:
         self.primary_brush = self.settings.value("primary_brush", "")
         self.secondary_brush = self.settings.value("secondary_brush", "")
         self.keep_config_tool_switch = self.settings.value("keep_config_tool_switch", True, type=bool)
+        self.use_previous_brush_as_primary = self.settings.value("use_previous_brush_as_primary", False, type=bool)
         self.keep_opacity_line_tool_switch = self.settings.value("keep_opacity_line_tool_switch", True, type=bool)
         self.keep_size_line_tool_switch = self.settings.value("keep_size_line_tool_switch", True, type=bool)
         self.deactivate_pressure_on_start = self.settings.value("deactivate_pressure_on_start", True, type=bool)
@@ -28,6 +29,10 @@ class ZssorkSettings:
     def set_secondary_brush(self, name):
         self.secondary_brush = name
         self.settings.setValue("secondary_brush", self.secondary_brush)
+
+    def toggle_use_previous_brush_as_primary(self):
+        self.use_previous_brush_as_primary = not self.use_previous_brush_as_primary
+        self.settings.setValue("use_previous_brush_as_primary", self.use_previous_brush_as_primary)
 
     def toggle_keep_config_tool_switch(self):
         self.keep_config_tool_switch = not self.keep_config_tool_switch
@@ -77,6 +82,10 @@ class ZssorkToolsSettingsDialog(QDialog):
         self.keep_config_switch.setChecked(self.settings.keep_config_tool_switch)
         self.keep_config_switch.stateChanged.connect(self.settings.toggle_keep_config_tool_switch)
 
+        self.use_previous_switch = QCheckBox("Use previous brush as primary brush (toggles now between last selected and the secondary brush)", self)
+        self.use_previous_switch.setChecked(self.settings.use_previous_brush_as_primary)
+        self.use_previous_switch.stateChanged.connect(self.settings.toggle_use_previous_brush_as_primary)
+
         self.keep_opacity_switch = QCheckBox("Keep same opacity on line tool switch", self)
         self.keep_opacity_switch.setChecked(self.settings.keep_opacity_line_tool_switch)
         self.keep_opacity_switch.stateChanged.connect(self.settings.toggle_keep_opacity_line_tool_switch)
@@ -113,6 +122,7 @@ class ZssorkToolsSettingsDialog(QDialog):
         layout.addWidget(self.btn_set_secondary)
         layout.addWidget(self.chooser)
         layout.addWidget(self.keep_config_switch)
+        layout.addWidget(self.use_previous_switch)
         layout.addWidget(self.keep_opacity_switch)
         layout.addWidget(self.keep_size_switch)
         layout.addWidget(self.deactivate_pressure_on_start)
@@ -156,6 +166,7 @@ class ZssorkTools(Extension):
         self.settings = ZssorkSettings()
         self.dialog = ZssorkToolsSettingsDialog(self.settings)
         self.previous_tool = None
+        self.previous_brush = None
         self.is_left_mouse_button_down = False
         self.is_shift_key_down = False
         QApplication.instance().installEventFilter(self)
@@ -271,16 +282,23 @@ class ZssorkTools(Extension):
         QApplication.instance().installEventFilter(self)
 
     def toggle_brush(self):
-        if self.is_preset_resource_active(self.settings.primary_brush):
-            self.activate_preset_resource(self.settings.secondary_brush)
+        if self.is_preset_resource_active(self.settings.secondary_brush):
+            if self.previous_brush and self.settings.use_previous_brush_as_primary:
+                self.activate_preset_resource(self.previous_brush)
+            else:
+                self.activate_preset_resource(self.settings.primary_brush)
         else:
-            self.activate_preset_resource(self.settings.primary_brush)
+            self.previous_brush = self.get_active_preset_resource_name()
+            self.activate_preset_resource(self.settings.secondary_brush)
 
-    def is_preset_resource_active(self, name):
+    def get_active_preset_resource_name(self):
         krita = Krita.instance()
         window = krita.activeWindow()
         view = window.activeView()
-        return name == view.currentBrushPreset().name()
+        return view.currentBrushPreset().name()
+
+    def is_preset_resource_active(self, name):
+        return name == self.get_active_preset_resource_name()
 
     def activate_preset_resource(self, name):
         if not name:
