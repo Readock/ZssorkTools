@@ -31,7 +31,7 @@ Collection of scripts that I use for my painting workflow in Krita.
 
 > [!WARNING]
 > 
-> The shortcuts might be conflicting with your current shortcuts so make sure to resolve any conflicts first!
+> The shortcuts might be conflicting with your current shortcuts so make sure to resolve any conflicts! The plugin shortcuts can also be changed in `Settings > Keyboard Shortcuts`
 > 
 ## Plugin Installation
 
