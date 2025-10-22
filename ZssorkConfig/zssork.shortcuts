@@ -1,0 +1,17 @@
+[Shortcuts]
+KritaFill/KisToolFill=none
+activate_preset_0=Ctrl+Alt+0;\s
+activate_preset_1=Ctrl+Alt+1; <
+activate_preset_2=Ctrl+Alt+2; Y
+decrease_brush_size=none
+disable_pressure=none
+execute_script_1=Ctrl+Shift+1; V
+execute_script_2=Ctrl+Shift+2; C
+execute_script_3=Ctrl+Shift+3; D
+execute_script_4=Ctrl+Shift+4; F
+file_export_file=F5
+increase_brush_size=none
+pathsegment-line=none
+reset_fg_bg=none
+show_brush_editor=none
+svg_decrease_font_size=none
