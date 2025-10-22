@@ -1,11 +1,9 @@
 
+# Zssork Krita Tools
+
 <p align="center">
   <img src="./thumbnail.jpg" width="25%"> 
 </p>
-
---- 
-
-# Zssork Krita Tools
 
 Collection of scripts that I use for my painting workflow in Krita.
 
@@ -49,4 +47,4 @@ If you also want to have my layout and shortcuts. Go to your krita konfig path a
 
 ### My Brushes (Optional)
 
-If you want to have my brushes, you can import the [zssork_brushes.bundle](https://raw.githubusercontent.com/Readock/ZssorkTools/main/zssork_brushes.bundle)
+If you want to have my brushes, you can import this [bundle](https://raw.githubusercontent.com/Readock/ZssorkTools/main/zssork_brushes.bundle)
