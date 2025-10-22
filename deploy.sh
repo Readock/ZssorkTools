@@ -18,4 +18,5 @@ cp -r "./$PLUGIN_NAME" "$KRITA_DIR/pykrita/$PLUGIN_NAME"
 cp "./$PLUGIN_NAME.desktop" "$KRITA_DIR/pykrita/$PLUGIN_NAME.desktop"
 cp "./$PLUGIN_NAME.action" "$KRITA_DIR/actions/$PLUGIN_NAME.action"
 
+# run krita
 flatpak run org.kde.krita
