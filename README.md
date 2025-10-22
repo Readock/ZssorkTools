@@ -29,6 +29,10 @@ Collection of scripts that I use for my painting workflow in Krita.
 
 > I also use the [Separate Brush and Eraser](https://github.com/ollyisonit/krita-separate-brush-eraser) plugin with Brush (B) and Eraser (E)
 
+> [!WARNING]
+> 
+> The shortcuts might be conflicting with your current shortcuts so make sure to resolve any conflicts first!
+> 
 ## Plugin Installation
 
 Download the [ZssorkTools.zip](https://github.com/Readock/ZssorkTools/archive/refs/heads/main.zip) file and install it by going to `Tools > Scripts > Import Python Plugin From File...` in Krita. 
