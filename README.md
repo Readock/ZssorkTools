@@ -39,3 +39,7 @@ If you also want to have my layout and shortcuts. Go to your krita konfig path a
 - *.profile => krita/input
 - *.shortcuts => krita/shortcuts
 - *.colors => krita/color-schemes
+
+### My Brushes (Optional)
+
+If you want to have my brushes, you can import the [zssork_brushes.bundle](https://raw.githubusercontent.com/Readock/ZssorkTools/main/zssork_brushes.bundle)
