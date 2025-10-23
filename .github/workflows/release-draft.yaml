@@ -30,9 +30,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          tag_name: latest
-          name: "1.0 Release Draft"
-          preserve_order: true
+          name: "1.0"
           body: |
             ## What's Included
             - **ZssorkTools.zip** – The krita plugin
