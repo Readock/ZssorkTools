@@ -1,0 +1,40 @@
+name: Release Draft
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create zip
+        run: |
+          mkdir -p zssork-tools
+          cp -r ZssorkTools zssork-tools/ZssorkTools
+          cp ZssorkTools.action zssork-tools/ZssorkTools.action
+          cp ZssorkTools.desktop zssork-tools/ZssorkTools.desktop
+          cp README.md zssork-tools/README.md
+
+          zip -r zssork-tools.zip zssork-tools
+      - name: Create Release Draft
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          tag_name: latest
+          name: "1.0 Release Draft"
+          files: |
+            zssork-tools.zip
+            zssork.bundle
+            ZssorkConfig/zssork.kws
+            ZssorkConfig/zssork.profile
+            ZssorkConfig/zssork.shortcut
+            ZssorkConfig/zssork-theme.colors
