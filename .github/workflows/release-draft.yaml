@@ -32,6 +32,7 @@ jobs:
           draft: true
           tag_name: latest
           name: "1.0 Release Draft"
+          preserve_order: true
           body: |
             ## What's Included
             - **ZssorkTools.zip** – The krita plugin
