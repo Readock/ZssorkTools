@@ -36,20 +36,20 @@ Collection of scripts that I use for my painting workflow in Krita.
 
 ## Plugin Installation
 
-Download the [ZssorkTools.zip](https://github.com/Readock/ZssorkTools/archive/refs/heads/main.zip) file and install it by going to `Tools > Scripts > Import Python Plugin From File...` in Krita. 
+Download the [ZssorkTools.zip](https://github.com/Readock/ZssorkTools/releases/download/latest/ZssorkTools.zip) file and install it by going to `Tools > Scripts > Import Python Plugin From File...` in Krita. 
 
 After a restart there should be a new menu under `Tools > Scripts > Zssork`. Open the settings there and select your primary/secondary brushes. If you want to change the shortcuts you can find them in the normal Krita Settings Shortcut section. 
 
 If you're having issues, more information on plugin installation can be found [here](https://docs.krita.org/en/user_manual/python_scripting/install_custom_python_plugin.html).
 
 ### My Config (Optional)
-If you also want to have my layout and shortcuts. Go to your krita konfig path and copy the files from the `ZssorkConfig` folder:
+If you also want to have my layout and shortcuts. Download the [Config.zip](https://github.com/Readock/ZssorkTools/releases/download/latest/Config.zip) file and place the files in your krita resource folder:
 
-- *.kws => krita/workspaces
-- *.profile => krita/input
-- *.shortcuts => krita/shortcuts
-- *.colors => krita/color-schemes
+- zssork.kws => krita/workspaces
+- zssork.profile => krita/input
+- zssork.shortcuts => krita/shortcuts
+- zssork-theme.colors => krita/color-schemes
 
 ### My Brushes (Optional)
 
-If you want to have my brushes, you can import this [bundle](https://raw.githubusercontent.com/Readock/ZssorkTools/main/Zssork.bundle)
+If you want to have my brushes, you can import the [zssork.bundle](https://github.com/Readock/ZssorkTools/releases/download/latest/Zssork.bundle) file into krita
