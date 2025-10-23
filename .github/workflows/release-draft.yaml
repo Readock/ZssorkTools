@@ -23,7 +23,8 @@ jobs:
           cp ZssorkTools.desktop zssork-tools/ZssorkTools.desktop
           cp README.md zssork-tools/README.md
 
-          zip -r zssork-tools.zip zssork-tools
+          zip -r zssork-tools-plugin.zip zssork-tools
+          zip -r zssork-config.zip ZssorkConfig
       - name: Create Release Draft
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -31,10 +32,12 @@ jobs:
           draft: true
           tag_name: latest
           name: "1.0 Release Draft"
+          body: |
+            ## What's Included
+            - **zssork-tools-plugin.zip** – The krita plugin
+            - **zssork-config.zip** – My krita configuration files
+            - **zssork.bundle** – My brush presets
           files: |
-            zssork-tools.zip
+            zssork-tools-plugin.zip
+            zssork-config.zip
             zssork.bundle
-            ZssorkConfig/zssork.kws
-            ZssorkConfig/zssork.profile
-            ZssorkConfig/zssork.shortcut
-            ZssorkConfig/zssork-theme.colors
