@@ -17,7 +17,6 @@ class ZssorkSettings:
         self.keep_config_tool_switch = self.settings.value("keep_config_tool_switch", True, type=bool)
         self.use_previous_brush_as_primary = self.settings.value("use_previous_brush_as_primary", False, type=bool)
         self.keep_opacity_line_tool_switch = self.settings.value("keep_opacity_line_tool_switch", True, type=bool)
-        self.keep_size_line_tool_switch = self.settings.value("keep_size_line_tool_switch", True, type=bool)
         self.deactivate_pressure_on_start = self.settings.value("deactivate_pressure_on_start", True, type=bool)
         self.brush_size_modifier = self.settings.value("brush_size_modifier", 0.2, type=float)
         self.brush_opacity_modifier = self.settings.value("brush_opacity_modifier", 0.25, type=float)
@@ -41,10 +40,6 @@ class ZssorkSettings:
     def toggle_keep_opacity_line_tool_switch(self):
         self.keep_opacity_line_tool_switch = not self.keep_opacity_line_tool_switch
         self.settings.setValue("keep_opacity_line_tool_switch", self.keep_opacity_line_tool_switch)
-
-    def toggle_keep_size_line_tool_switch(self):
-        self.keep_size_line_tool_switch = not self.keep_size_line_tool_switch
-        self.settings.setValue("keep_size_line_tool_switch", self.keep_size_line_tool_switch)
 
     def toggle_deactivate_pressure_on_start(self):
         self.deactivate_pressure_on_start = not self.deactivate_pressure_on_start
@@ -86,13 +81,9 @@ class ZssorkToolsSettingsDialog(QDialog):
         self.use_previous_switch.setChecked(self.settings.use_previous_brush_as_primary)
         self.use_previous_switch.stateChanged.connect(self.settings.toggle_use_previous_brush_as_primary)
 
-        self.keep_opacity_switch = QCheckBox("Keep same opacity on line tool switch", self)
-        self.keep_opacity_switch.setChecked(self.settings.keep_opacity_line_tool_switch)
-        self.keep_opacity_switch.stateChanged.connect(self.settings.toggle_keep_opacity_line_tool_switch)
-
-        self.keep_size_switch = QCheckBox("Keep same size on line tool switch", self)
-        self.keep_size_switch.setChecked(self.settings.keep_size_line_tool_switch)
-        self.keep_size_switch.stateChanged.connect(self.settings.toggle_keep_size_line_tool_switch)
+        self.line_tool_switch = QCheckBox("Line tool switch with keep same opacity (Shift)", self)
+        self.line_tool_switch.setChecked(self.settings.keep_opacity_line_tool_switch)
+        self.line_tool_switch.stateChanged.connect(self.settings.toggle_keep_opacity_line_tool_switch)
 
         self.deactivate_pressure_on_start = QCheckBox("Deactivate pen pressure on startup", self)
         self.deactivate_pressure_on_start.setChecked(self.settings.deactivate_pressure_on_start)
@@ -123,8 +114,7 @@ class ZssorkToolsSettingsDialog(QDialog):
         layout.addWidget(self.chooser)
         layout.addWidget(self.keep_config_switch)
         layout.addWidget(self.use_previous_switch)
-        layout.addWidget(self.keep_opacity_switch)
-        layout.addWidget(self.keep_size_switch)
+        layout.addWidget(self.line_tool_switch)
         layout.addWidget(self.deactivate_pressure_on_start)
 
         form_layout = QFormLayout()
@@ -169,11 +159,18 @@ class ZssorkTools(Extension):
         self.previous_brush = None
         self.is_left_mouse_button_down = False
         self.is_shift_key_down = False
+        self.is_space_key_down = False
         QApplication.instance().installEventFilter(self)
 
 
     def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Space and not event.isAutoRepeat():
+            self.is_space_key_down = True
+        if event.type() == QEvent.KeyRelease and event.key() == Qt.Key_Space and not event.isAutoRepeat():
+            self.is_space_key_down = False
         try:
+            if not self.settings.keep_opacity_line_tool_switch:
+                return False
             if event.type() == QEvent.KeyPress and event.key() == Qt.Key_Shift and not event.isAutoRepeat():
                 self.is_shift_key_down = True
                 self.temporary_switch_to_line_tool()
@@ -312,9 +309,9 @@ class ZssorkTools(Extension):
             opacity = view.paintingOpacity()
             size = view.brushSize()
             view.setCurrentBrushPreset(resource)
-            if self.settings.keep_config_tool_switch:
+            if self.settings.keep_config_tool_switch or self.is_space_key_down:
                 view.setBrushSize(size)
-            if self.settings.keep_config_tool_switch:
+            if self.settings.keep_config_tool_switch or self.is_space_key_down:
                 view.setPaintingOpacity(opacity)
 
     def toggle_opacity(self):
